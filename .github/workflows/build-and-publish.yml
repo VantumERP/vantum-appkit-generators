@@ -23,6 +23,11 @@ jobs:
       with:
         dotnet-version: '9.0.x'
     
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+      with:
+        nuget-version: 'latest'
+    
     - name: Restore Generator dependencies
       run: dotnet restore Vantum.AppKit.Generators.csproj
     
@@ -53,16 +58,7 @@ jobs:
         Write-Host "✅ Generator tests passed!" -ForegroundColor Green
     
     - name: Create NuGet Package
-      shell: pwsh
-      run: |
-        # Install NuGet as a .NET tool
-        dotnet tool install --global NuGet.CommandLine --version 6.11.1 2>&1 | Out-Null
-        
-        Write-Host "Creating NuGet package..."
-        nuget pack Vantum.AppKit.Generators.nuspec -OutputDirectory output -Properties Configuration=Release
-        
-        Write-Host "Package created:"
-        Get-ChildItem output/*.nupkg
+      run: nuget pack Vantum.AppKit.Generators.nuspec -OutputDirectory output -Properties Configuration=Release
     
     - name: Upload Package Artifact
       uses: actions/upload-artifact@v4
