@@ -55,12 +55,11 @@ jobs:
     - name: Create NuGet Package
       shell: pwsh
       run: |
-        # Use NuGet.exe to pack the .nuspec file
-        Write-Host "Downloading NuGet.exe..."
-        Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile "nuget.exe"
+        # Install NuGet as a .NET tool
+        dotnet tool install --global NuGet.CommandLine --version 6.11.1 2>&1 | Out-Null
         
         Write-Host "Creating NuGet package..."
-        ./nuget.exe pack Vantum.AppKit.Generators.nuspec -OutputDirectory output -Properties Configuration=Release
+        nuget pack Vantum.AppKit.Generators.nuspec -OutputDirectory output -Properties Configuration=Release
         
         Write-Host "Package created:"
         Get-ChildItem output/*.nupkg
