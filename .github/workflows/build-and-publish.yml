@@ -23,11 +23,14 @@ jobs:
       with:
         dotnet-version: '9.0.x'
     
-    - name: Restore dependencies
+    - name: Restore Generator dependencies
       run: dotnet restore Vantum.AppKit.Generators.csproj
     
     - name: Build Generator
       run: dotnet build Vantum.AppKit.Generators.csproj --configuration Release --no-restore
+    
+    - name: Restore Test Consumer dependencies
+      run: dotnet restore TestConsumer/TestConsumer.csproj
     
     - name: Build Test Consumer
       run: dotnet build TestConsumer/TestConsumer.csproj --configuration Release --no-restore
