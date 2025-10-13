@@ -53,7 +53,17 @@ jobs:
         Write-Host "✅ Generator tests passed!" -ForegroundColor Green
     
     - name: Create NuGet Package
-      run: dotnet pack Vantum.AppKit.Generators.nuspec -o output
+      shell: pwsh
+      run: |
+        # Use NuGet.exe to pack the .nuspec file
+        Write-Host "Downloading NuGet.exe..."
+        Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile "nuget.exe"
+        
+        Write-Host "Creating NuGet package..."
+        ./nuget.exe pack Vantum.AppKit.Generators.nuspec -OutputDirectory output -Properties Configuration=Release
+        
+        Write-Host "Package created:"
+        Get-ChildItem output/*.nupkg
     
     - name: Upload Package Artifact
       uses: actions/upload-artifact@v4
