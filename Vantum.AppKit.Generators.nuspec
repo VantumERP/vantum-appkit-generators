@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>Vantum.AppKit.Generators</id>
+        <version>0.1.0</version>
+        <authors>Adnan Crnovršanin</authors>
+        <owners>Actaer</owners>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <license type="expression">AGPL-3.0-only</license>
+        <projectUrl>https://github.com/VantumERP/vantum-appkit-generators</projectUrl>
+        <description>Roslyn source generator that produces JSON manifests from AppKit attributes for
+            the Vantum platform. Scans [AppModule] classes and generates compile-time manifest
+            constants.</description>
+        <releaseNotes>Initial release of the AppKit manifest generator.</releaseNotes>
+        <copyright>Copyright © Actaer 2025</copyright>
+        <tags>roslyn source-generator code-generation vantum appkit manifest</tags>
+        <repository type="git" url="https://github.com/VantumERP/vantum-appkit-generators" />
+        <readme>README.md</readme>
+        <developmentDependency>true</developmentDependency>
+    </metadata>
+    <files>
+        <!-- The generator DLL -->
+        <file src="bin\Release\netstandard2.1\Vantum.AppKit.Generators.dll"
+            target="analyzers\dotnet\cs" />
+
+        <!-- README for NuGet package page -->
+        <file src="README.md" target="" />
+    </files>
+</package>

@@ -1,0 +1,96 @@
+name: Build, Test & Publish
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-test-pack:
+    name: Build, Test & Package
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for versioning
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore Vantum.AppKit.Generators.csproj
+    
+    - name: Build Generator
+      run: dotnet build Vantum.AppKit.Generators.csproj --configuration Release --no-restore
+    
+    - name: Build Test Consumer
+      run: dotnet build TestConsumer/TestConsumer.csproj --configuration Release --no-restore
+    
+    - name: Run Test Consumer
+      run: dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build
+    
+    - name: Verify Generated Manifests
+      shell: pwsh
+      run: |
+        $output = dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build
+        if ($output -notmatch "Found 2 generated manifest") {
+          Write-Error "Generator test failed - expected 2 manifests"
+          exit 1
+        }
+        if ($output -notmatch "✅ Generator is working") {
+          Write-Error "Generator test failed"
+          exit 1
+        }
+        Write-Host "✅ Generator tests passed!" -ForegroundColor Green
+    
+    - name: Create NuGet Package
+      run: dotnet pack Vantum.AppKit.Generators.nuspec -o output
+    
+    - name: Upload Package Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-package
+        path: output/*.nupkg
+        retention-days: 7
+    
+    - name: Publish to NuGet.org
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        dotnet nuget push "output/*.nupkg" \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+      continue-on-error: false
+    
+    - name: Create Release Tag
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: pwsh
+      run: |
+        # Extract version from .csproj
+        [xml]$proj = Get-Content Vantum.AppKit.Generators.csproj
+        $version = $proj.Project.PropertyGroup.Version
+        
+        if ($version) {
+          Write-Host "Creating release tag v$version"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Check if tag exists
+          $tagExists = git tag -l "v$version"
+          if (-not $tagExists) {
+            git tag "v$version"
+            git push origin "v$version"
+            Write-Host "✅ Created and pushed tag v$version"
+          } else {
+            Write-Host "⚠️ Tag v$version already exists, skipping"
+          }
+        } else {
+          Write-Warning "Could not extract version from project file"
+        }
+      continue-on-error: true

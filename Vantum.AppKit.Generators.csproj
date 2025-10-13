@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <Nullable>enable</Nullable>
+
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>Vantum.AppKit.Generators</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Vantum Team</Authors>
+    <Company>Vantum ERP</Company>
+    <Description>Roslyn source generator that produces JSON manifests from AppKit attributes for the
+      Vantum platform. Scans [AppModule] classes and generates compile-time manifest constants.</Description>
+    <PackageTags>roslyn;source-generator;code-generation;vantum;appkit;manifest</PackageTags>
+    <PackageProjectUrl>https://github.com/VantumERP/vantum-appkit-generators</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/VantumERP/vantum-appkit-generators</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Exclude TestConsumer from compilation -->
+    <Compile Remove="TestConsumer\**" />
+    <EmbeddedResource Remove="TestConsumer\**" />
+    <None Remove="TestConsumer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Include generator DLL and README in package -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!--  Include the built DLL in the package -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificContentInPackage>
+      $(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="_AddAnalyzersToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll"
+        PackagePath="analyzers/dotnet/cs" />
+    </ItemGroup>
+  </Target>
+
+</Project>

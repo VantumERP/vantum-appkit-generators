@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Reference the generator (it won't leak into consumers) -->
+        <ProjectReference Include="..\Vantum.AppKit.Generators.csproj"
+            OutputItemType="Analyzer"
+            ReferenceOutputAssembly="false" />
+
+        <!-- Reference the attributes package -->
+        <PackageReference Include="Vantum.AppKit" Version="0.1.2" />
+    </ItemGroup>
+
+</Project>
