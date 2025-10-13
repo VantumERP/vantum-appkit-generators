@@ -35,18 +35,18 @@ jobs:
     - name: Build Test Consumer
       run: dotnet build TestConsumer/TestConsumer.csproj --configuration Release --no-restore
     
-    - name: Run Test Consumer
-      run: dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build
-    
-    - name: Verify Generated Manifests
+    - name: Run and Verify Test Consumer
       shell: pwsh
       run: |
-        $output = dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build
+        Write-Host "Running test consumer..."
+        $output = dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build 2>&1 | Out-String
+        Write-Host $output
+        
         if ($output -notmatch "Found 2 generated manifest") {
           Write-Error "Generator test failed - expected 2 manifests"
           exit 1
         }
-        if ($output -notmatch "✅ Generator is working") {
+        if ($output -notmatch "Generator is working") {
           Write-Error "Generator test failed"
           exit 1
         }
