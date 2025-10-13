@@ -28,6 +28,12 @@ jobs:
       with:
         nuget-version: 'latest'
     
+    - name: Install Mono (for NuGet on Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mono-complete
+    
     - name: Restore Generator dependencies
       run: dotnet restore Vantum.AppKit.Generators.csproj
     
