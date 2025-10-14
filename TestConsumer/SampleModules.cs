@@ -2,7 +2,7 @@ using Vantum.AppKit;
 
 namespace TestConsumer.Modules
 {
-    [AppModule("ContactsManagement",
+    [AppModule(Name = "ContactsManagement",
                DisplayName = "Contacts",
                Version = "1.0.0",
                Description = "Manage customer contacts and relationships")]
@@ -14,7 +14,7 @@ namespace TestConsumer.Modules
                     Description = "Default group for new contacts")]
         public const string DefaultGroupSetting = "Contacts.DefaultGroup";
 
-        [AppSetting("Contacts.MaxPerPage", AppSettingType.Number,
+        [AppSetting("Contacts.MaxPerPage", AppSettingType.Int,
                     DefaultValue = "50",
                     Description = "Maximum contacts to return per page")]
         public const string MaxPerPageSetting = "Contacts.MaxPerPage";
@@ -35,7 +35,7 @@ namespace TestConsumer.Modules
         public void DeleteContact() { }
     }
 
-    [AppModule("TaskManagement",
+    [AppModule(Name = "TaskManagement",
                DisplayName = "Tasks",
                Version = "0.5.0",
                Description = "Task tracking and assignment")]

@@ -14,7 +14,7 @@
             ReferenceOutputAssembly="false" />
 
         <!-- Reference the attributes package -->
-        <PackageReference Include="Vantum.AppKit" Version="0.1.2" />
+        <PackageReference Include="Vantum.AppKit" Version="0.1.4" />
     </ItemGroup>
 
 </Project>

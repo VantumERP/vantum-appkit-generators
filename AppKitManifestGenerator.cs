@@ -1,5 +1,7 @@
 #nullable enable
 
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -63,16 +65,55 @@ namespace Vantum.AppKit.Generators
             if (classes.IsDefaultOrEmpty)
                 return;
 
+            // STEP 1: Parse manifests from anchors with [AppModule]
+            var manifestsByName = new Dictionary<string, ManifestDto>(StringComparer.OrdinalIgnoreCase);
+
             foreach (var classSymbol in classes)
             {
                 if (classSymbol == null)
                     continue;
 
-                // Parse the manifest
+                // Parse the manifest from the anchor class
                 var manifest = AttributeParser.ParseManifest(classSymbol);
                 if (manifest == null || string.IsNullOrWhiteSpace(manifest.Name))
                     continue;
 
+                manifestsByName[manifest.Name] = manifest;
+            }
+
+            // STEP 2: Infer routes from controllers with [AppBelongsTo]
+            var inferredRoutes = RouteInference.InferRoutesFromControllers(compilation);
+
+            // STEP 3: Merge inferred routes into manifests
+            foreach (var kvp in inferredRoutes)
+            {
+                var moduleName = kvp.Key;
+                var routes = kvp.Value;
+
+                if (manifestsByName.TryGetValue(moduleName, out var manifest))
+                {
+                    // Add inferred routes to the manifest
+                    manifest.Routes.AddRange(routes);
+                }
+                else
+                {
+                    // No anchor found for this module - create a minimal manifest
+                    // (This allows controllers to define modules implicitly)
+                    manifest = new ManifestDto
+                    {
+                        Name = moduleName,
+                        DisplayName = moduleName,
+                        Version = "0.1.0",
+                        Description = $"Auto-generated manifest for {moduleName}",
+                        Routes = routes
+                    };
+                    manifestsByName[moduleName] = manifest;
+                }
+            }
+
+            // STEP 4: Generate source for each manifest
+            foreach (var manifest in manifestsByName.Values)
+            {
                 // Serialize to JSON
                 var json = JsonSerializer.Serialize(manifest);
 
