@@ -51,8 +51,8 @@ jobs:
         $output = dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build 2>&1 | Out-String
         Write-Host $output
         
-        if ($output -notmatch "Found 2 generated manifest") {
-          Write-Error "Generator test failed - expected 2 manifests"
+        if ($output -notmatch "Found 5 generated manifest") {
+          Write-Error "Generator test failed - expected 5 manifests"
           exit 1
         }
         if ($output -notmatch "Generator is working") {
