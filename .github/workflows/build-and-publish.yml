@@ -52,12 +52,26 @@ jobs:
     - name: Build
       run: dotnet build -c Release --no-restore
     
+    - name: Build Test Consumer
+      run: dotnet build TestConsumer/TestConsumer.csproj -c Release --no-restore
+    
     - name: Run and Verify Test Consumer
       shell: bash
       run: |
         echo "Running test consumer..."
+        set +e  # Don't exit on error immediately
         output=$(dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build 2>&1)
+        exit_code=$?
+        set -e
+        
+        echo "=== Test Consumer Output ==="
         echo "$output"
+        echo "=== End Output (exit code: $exit_code) ==="
+        
+        if [ $exit_code -ne 0 ]; then
+          echo "❌ Test consumer failed to run (exit code: $exit_code)"
+          exit 1
+        fi
         
         if ! echo "$output" | grep -q "Found 5 generated manifest"; then
           echo "❌ Generator test failed - expected 5 manifests"
