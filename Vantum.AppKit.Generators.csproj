@@ -24,8 +24,7 @@
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/VantumERP/vantum-appkit-generators</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>false</IncludeSymbols>
     <DevelopmentDependency>true</DevelopmentDependency>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>

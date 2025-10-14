@@ -42,9 +42,15 @@ jobs:
       shell: bash
       run: |
         # Update the version in the .csproj file
-        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.version }}<\/Version>/" Vantum.AppKit.Generators.csproj
+        VERSION="${{ steps.version.outputs.version }}"
+        echo "Updating version to: $VERSION"
+        sed -i.bak "s|<Version>[^<]*</Version>|<Version>$VERSION</Version>|g" Vantum.AppKit.Generators.csproj
+        echo ""
         echo "Updated version in .csproj:"
-        cat Vantum.AppKit.Generators.csproj | grep -A 2 -B 2 "<Version>"
+        grep "<Version>" Vantum.AppKit.Generators.csproj
+        echo ""
+        echo "Full PropertyGroup section:"
+        cat Vantum.AppKit.Generators.csproj | grep -A 10 -B 2 "<Version>"
     
     - name: Restore dependencies
       run: dotnet restore
@@ -94,8 +100,8 @@ jobs:
       shell: bash
       run: |
         shopt -s nullglob
-        # Push both .nupkg and .snupkg files to NuGet.org
-        for f in artifacts/*.nupkg artifacts/*.snupkg; do
+        # Push .nupkg files to NuGet.org
+        for f in artifacts/*.nupkg; do
           if [ -f "$f" ]; then
             echo "Pushing $f to NuGet.org..."
             dotnet nuget push "$f" \
