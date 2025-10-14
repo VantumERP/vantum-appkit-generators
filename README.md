@@ -12,6 +12,7 @@ This generator enables **code-first metadata** for Vantum modules. By decorating
 - **Settings** (configuration surface)
 - **Domain Events** (published/subscribed)
 
+
 ## Installation
 
 Add the generator to your project:
