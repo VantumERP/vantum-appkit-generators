@@ -9,88 +9,89 @@ jobs:
   build-test-pack:
     name: Build, Test & Package
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     
     steps:
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Fetch all history for versioning
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
     
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v2
-      with:
-        nuget-version: 'latest'
-    
-    - name: Install Mono (for NuGet on Linux)
-      if: runner.os == 'Linux'
+    - name: Extract version from tag
+      id: version
+      shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install -y mono-complete
+        if [[ "${{ github.ref }}" =~ ^refs/tags/v(.+)$ ]]; then
+          # Extract version from tag (v0.1.0 -> 0.1.0)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+        else
+          # Use version from .csproj for manual workflow dispatch
+          VERSION=$(grep -oP '<Version>\K[^<]+' Vantum.AppKit.Generators.csproj)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Using version from .csproj: $VERSION"
+        fi
     
-    - name: Restore Generator dependencies
-      run: dotnet restore Vantum.AppKit.Generators.csproj
+    - name: Update project version
+      shell: bash
+      run: |
+        # Update the version in the .csproj file
+        sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.version.outputs.version }}<\/Version>/" Vantum.AppKit.Generators.csproj
+        echo "Updated version in .csproj:"
+        cat Vantum.AppKit.Generators.csproj | grep -A 2 -B 2 "<Version>"
     
-    - name: Build Generator
-      run: dotnet build Vantum.AppKit.Generators.csproj --configuration Release --no-restore
+    - name: Restore dependencies
+      run: dotnet restore
     
-    - name: Restore Test Consumer dependencies
-      run: dotnet restore TestConsumer/TestConsumer.csproj
-    
-    - name: Build Test Consumer
-      run: dotnet build TestConsumer/TestConsumer.csproj --configuration Release --no-restore
+    - name: Build
+      run: dotnet build -c Release --no-restore
     
     - name: Run and Verify Test Consumer
-      shell: pwsh
+      shell: bash
       run: |
-        Write-Host "Running test consumer..."
-        $output = dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build 2>&1 | Out-String
-        Write-Host $output
+        echo "Running test consumer..."
+        output=$(dotnet run --project TestConsumer/TestConsumer.csproj --configuration Release --no-build 2>&1)
+        echo "$output"
         
-        if ($output -notmatch "Found 5 generated manifest") {
-          Write-Error "Generator test failed - expected 5 manifests"
+        if ! echo "$output" | grep -q "Found 5 generated manifest"; then
+          echo "❌ Generator test failed - expected 5 manifests"
           exit 1
-        }
-        if ($output -notmatch "Generator is working") {
-          Write-Error "Generator test failed"
+        fi
+        if ! echo "$output" | grep -q "Generator is working"; then
+          echo "❌ Generator test failed"
           exit 1
-        }
-        Write-Host "✅ Generator tests passed!" -ForegroundColor Green
+        fi
+        echo "✅ Generator tests passed!"
     
-    - name: Create NuGet Package
-      run: nuget pack Vantum.AppKit.Generators.nuspec -OutputDirectory output -Properties Configuration=Release
+    - name: Pack
+      run: dotnet pack -c Release --no-build -o artifacts
     
-    - name: Upload Package Artifact
+    - name: Push packages to NuGet.org
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      shell: bash
+      run: |
+        shopt -s nullglob
+        # Push both .nupkg and .snupkg files to NuGet.org
+        for f in artifacts/*.nupkg artifacts/*.snupkg; do
+          if [ -f "$f" ]; then
+            echo "Pushing $f to NuGet.org..."
+            dotnet nuget push "$f" \
+              --source https://api.nuget.org/v3/index.json \
+              --api-key "${{ secrets.NUGET_API_KEY }}" \
+              --skip-duplicate
+          fi
+        done
+    
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
+      if: always()
       with:
-        name: nuget-package
-        path: output/*.nupkg
-        retention-days: 7
-    
-    - name: Publish to NuGet.org
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-      run: |
-        dotnet nuget push "output/*.nupkg" \
-          --api-key ${{ secrets.NUGET_API_KEY }} \
-          --source https://api.nuget.org/v3/index.json \
-          --skip-duplicate
-      continue-on-error: false
-    
-    - name: Create GitHub Release
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-      shell: pwsh
-      run: |
-        # Extract version from tag
-        $tag = "${{ github.ref_name }}"
-        $version = $tag -replace '^v', ''
-        
-        Write-Host "Creating GitHub release for $tag (version $version)"
-        
-        # Note: This step documents the release tag
-        # The tag already exists since it triggered this workflow
-        Write-Host "✅ Tag $tag triggered this release"
-      continue-on-error: true
+        name: nuget-packages
+        path: artifacts/
+        retention-days: 30
