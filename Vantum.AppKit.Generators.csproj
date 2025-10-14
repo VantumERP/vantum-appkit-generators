@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
     <LangVersion>preview</LangVersion>
     <IsRoslynComponent>true</IsRoslynComponent>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <Nullable>enable</Nullable>
 
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Vantum.AppKit.Generators</PackageId>
-    <Version>0.1.2</Version>
+    <Version>0.1.5</Version>
     <Authors>Adnan Crnovršanin</Authors>
     <Company>Actaer</Company>
     <Description>Roslyn source generator that produces JSON manifests from AppKit attributes for the
@@ -24,9 +24,8 @@
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/VantumERP/vantum-appkit-generators</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+
     <IncludeSymbols>false</IncludeSymbols>
-    <DevelopmentDependency>true</DevelopmentDependency>
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
   <ItemGroup>
