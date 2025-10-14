@@ -7,6 +7,10 @@ namespace TestConsumer.Modules
                Version = "1.0.0",
                Description = "Manage customer contacts and relationships")]
     [AppPermissions("Contacts.Read", "Contacts.Write", "Contacts.Delete")]
+    [AppPublishesEvents("Contact.Created", "Contact.Updated", "Contact.Deleted")]
+    [AppSubscribesEvents("Company.Created")]
+    [AppDependsOn("Tenancy", ">=1.0 <2.0")]
+    [AppDependsOn("UserManagement", "^1.0")]
     public class ContactsModule
     {
         [AppSetting("Contacts.DefaultGroup", AppSettingType.String,
@@ -40,6 +44,8 @@ namespace TestConsumer.Modules
                Version = "0.5.0",
                Description = "Task tracking and assignment")]
     [AppPermissions("Tasks.Read", "Tasks.Write", "Tasks.Assign")]
+    [AppPublishesEvents("Task.Created", "Task.StatusChanged")]
+    [AppDependsOn("ContactsManagement", "^1.0")]
     public class TaskModule
     {
         [AppSetting("Tasks.DefaultPriority", AppSettingType.String,

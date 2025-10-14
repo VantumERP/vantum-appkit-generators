@@ -10,14 +10,15 @@
 
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>Vantum.AppKit.Generators</PackageId>
-    <Version>0.2.0</Version>
-    <Authors>Vantum Team</Authors>
-    <Company>Vantum ERP</Company>
+    <Version>0.1.2</Version>
+    <Authors>Adnan Crnovršanin</Authors>
+    <Company>Actaer</Company>
     <Description>Roslyn source generator that produces JSON manifests from AppKit attributes for the
       Vantum platform. Supports Pattern A (explicit routes) and Pattern B (auto-inferred routes from
       ASP.NET Core MVC attributes).
       Scans [AppModule] anchors and [AppBelongsTo] controllers to generate compile-time manifest
-      constants.</Description>
+      constants. Includes support for events (published/subscribed) and dependencies with version
+      ranges.</Description>
     <PackageTags>roslyn;source-generator;code-generation;vantum;appkit;manifest</PackageTags>
     <PackageProjectUrl>https://github.com/VantumERP/vantum-appkit-generators</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

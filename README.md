@@ -10,8 +10,8 @@ This generator enables **code-first metadata** for Vantum modules. By decorating
 - **Permissions** (canonical permission list)
 - **HTTP Routes** (endpoints and required permissions)
 - **Settings** (configuration surface)
-- **Domain Events** (published/subscribed)
-
+- **Events** (published and subscribed domain events)
+- **Dependencies** (required modules with version ranges)
 
 ## Installation
 
@@ -38,6 +38,10 @@ using Vantum.AppKit;
 [AppModule(Name = "Contacts", DisplayName = "Contacts Management",
            Version = "1.0.0", Description = "Manage customer contacts")]
 [AppPermissions("Contacts.Read", "Contacts.Write", "Contacts.Delete")]
+[AppPublishesEvents("Contact.Created", "Contact.Updated", "Contact.Deleted")]
+[AppSubscribesEvents("Company.Created")]
+[AppDependsOn("Tenancy", ">=1.0 <2.0")]
+[AppDependsOn("UserManagement", "^1.0")]
 public static class ContactsModuleAnchor
 {
     [AppSetting("Contacts.DefaultPageSize", AppSettingType.Int,
@@ -185,13 +189,17 @@ namespace Vantum.Generated
     {""key"": ""Contacts.DefaultGroup"", ""type"": ""String"", ""defaultValue"": ""General"", ""description"": ""Default group for new contacts""}
   ],
   ""eventsPublished"": [
-    ""ContactCreated"",
-    ""ContactUpdated""
+    ""Contact.Created"",
+    ""Contact.Updated"",
+    ""Contact.Deleted""
   ],
   ""eventsSubscribed"": [
-    ""UserCreated""
+    ""Company.Created""
   ],
-  ""dependencies"": []
+  ""dependencies"": [
+    {""app"": ""Tenancy"", ""versionRange"": "">=1.0 <2.0""},
+    {""app"": ""UserManagement"", ""versionRange"": ""^1.0""}
+  ]
 }";
     }
 }
@@ -237,6 +245,7 @@ foreach (var type in manifestTypes)
 | `[AppSetting]`          | Field/Property | Configuration setting                                      |
 | `[AppPublishesEvents]`  | Class          | Events this module publishes                               |
 | `[AppSubscribesEvents]` | Class          | Events this module consumes                                |
+| `[AppDependsOn]`        | Class          | Declares a dependency on another module with version range |
 
 ### Route Inference
 
@@ -286,7 +295,12 @@ When using `[AppRouteAuto]`, the generator automatically infers routes from ASP.
   ],
   "eventsPublished": ["string"],
   "eventsSubscribed": ["string"],
-  "dependencies": ["string"]
+  "dependencies": [
+    {
+      "app": "string",
+      "versionRange": "string"
+    }
+  ]
 }
 ```
 

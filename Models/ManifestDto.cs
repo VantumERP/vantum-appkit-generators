@@ -18,7 +18,7 @@ namespace Vantum.AppKit.Generators.Models
         public List<SettingDto> Settings { get; set; } = new List<SettingDto>();
         public List<string> EventsPublished { get; set; } = new List<string>();
         public List<string> EventsSubscribed { get; set; } = new List<string>();
-        public List<string> Dependencies { get; set; } = new List<string>();
+        public List<DependencyDto> Dependencies { get; set; } = new List<DependencyDto>();
     }
 
     internal sealed class RouteDto
@@ -34,5 +34,11 @@ namespace Vantum.AppKit.Generators.Models
         public string Type { get; set; } = string.Empty;
         public string? DefaultValue { get; set; }
         public string? Description { get; set; }
+    }
+
+    internal sealed class DependencyDto
+    {
+        public string App { get; set; } = string.Empty;
+        public string VersionRange { get; set; } = string.Empty;
     }
 }

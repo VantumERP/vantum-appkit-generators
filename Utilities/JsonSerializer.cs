@@ -25,7 +25,7 @@ namespace Vantum.AppKit.Generators.Utilities
             AppendSettings(sb, manifest.Settings, false);
             AppendStringArray(sb, "eventsPublished", manifest.EventsPublished, false);
             AppendStringArray(sb, "eventsSubscribed", manifest.EventsSubscribed, false);
-            AppendStringArray(sb, "dependencies", manifest.Dependencies, true);
+            AppendDependencies(sb, manifest.Dependencies, true);
 
             sb.AppendLine("}");
             return sb.ToString();
@@ -146,6 +146,36 @@ namespace Vantum.AppKit.Generators.Utilities
 
                     sb.Append("}");
                     if (i < settings.Count - 1) sb.Append(",");
+                    sb.AppendLine();
+                }
+                sb.Append("  ]");
+            }
+
+            if (!isLast) sb.Append(",");
+            sb.AppendLine();
+        }
+
+        private static void AppendDependencies(StringBuilder sb, List<DependencyDto> dependencies, bool isLast)
+        {
+            sb.Append("  \"dependencies\": [");
+
+            if (dependencies.Count == 0)
+            {
+                sb.Append("]");
+            }
+            else
+            {
+                sb.AppendLine();
+                for (int i = 0; i < dependencies.Count; i++)
+                {
+                    var dep = dependencies[i];
+                    sb.Append("    {");
+                    sb.Append("\"app\": \"");
+                    sb.Append(Escape(dep.App));
+                    sb.Append("\", \"versionRange\": \"");
+                    sb.Append(Escape(dep.VersionRange));
+                    sb.Append("\"}");
+                    if (i < dependencies.Count - 1) sb.Append(",");
                     sb.AppendLine();
                 }
                 sb.Append("  ]");

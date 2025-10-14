@@ -19,6 +19,7 @@ namespace Vantum.AppKit.Generators.Parsing
         private const string AppSettingAttribute = "Vantum.AppKit.AppSettingAttribute";
         private const string AppPublishesEventsAttribute = "Vantum.AppKit.AppPublishesEventsAttribute";
         private const string AppSubscribesEventsAttribute = "Vantum.AppKit.AppSubscribesEventsAttribute";
+        private const string AppDependsOnAttribute = "Vantum.AppKit.AppDependsOnAttribute";
 
         public static ManifestDto? ParseManifest(INamedTypeSymbol typeSymbol)
         {
@@ -44,6 +45,9 @@ namespace Vantum.AppKit.Generators.Parsing
 
             // Parse events
             ParseEvents(typeSymbol, manifest);
+
+            // Parse dependencies
+            ParseDependencies(typeSymbol, manifest);
 
             // Apply defaults
             if (string.IsNullOrWhiteSpace(manifest.DisplayName))
@@ -253,6 +257,31 @@ namespace Vantum.AppKit.Generators.Parsing
                             if (!string.IsNullOrWhiteSpace(eventName))
                                 manifest.EventsSubscribed.Add(eventName);
                         }
+                    }
+                }
+            }
+        }
+
+        private static void ParseDependencies(INamedTypeSymbol typeSymbol, ManifestDto manifest)
+        {
+            var dependencyAttrs = typeSymbol.GetAttributes()
+                .Where(a => a.AttributeClass?.ToDisplayString() == AppDependsOnAttribute);
+
+            foreach (var attr in dependencyAttrs)
+            {
+                // AppDependsOn takes two constructor arguments: appName and versionRange
+                if (attr.ConstructorArguments.Length >= 2)
+                {
+                    var appName = attr.ConstructorArguments[0].Value?.ToString();
+                    var versionRange = attr.ConstructorArguments[1].Value?.ToString();
+
+                    if (!string.IsNullOrWhiteSpace(appName) && !string.IsNullOrWhiteSpace(versionRange))
+                    {
+                        manifest.Dependencies.Add(new DependencyDto
+                        {
+                            App = appName,
+                            VersionRange = versionRange
+                        });
                     }
                 }
             }
