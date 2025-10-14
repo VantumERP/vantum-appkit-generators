@@ -52,6 +52,9 @@ jobs:
     - name: Build
       run: dotnet build -c Release --no-restore
     
+    - name: Restore Test Consumer dependencies
+      run: dotnet restore TestConsumer/TestConsumer.csproj
+    
     - name: Build Test Consumer
       run: dotnet build TestConsumer/TestConsumer.csproj -c Release --no-restore
     
